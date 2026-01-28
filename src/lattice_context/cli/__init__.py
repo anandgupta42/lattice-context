@@ -1,6 +1,9 @@
 """CLI commands for Lattice Context Layer."""
 
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Optional
 
 import typer
 from typing_extensions import Annotated
@@ -26,7 +29,7 @@ def init(
 def index(
     path: Annotated[Path, typer.Argument(help="Project path")] = Path("."),
     incremental: Annotated[bool, typer.Option("--incremental", help="Incremental index")] = False,
-    tool: Annotated[str | None, typer.Option("--tool", help="Index specific tool")] = None,
+    tool: Annotated[Optional[str], typer.Option("--tool", help="Index specific tool")] = None,
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False,
 ) -> None:
     """Index a project to extract decisions and conventions."""
@@ -49,8 +52,8 @@ def serve(
 def context(
     query: Annotated[str, typer.Argument(help="What are you trying to do?")],
     path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
-    entity: Annotated[str | None, typer.Option("--entity", help="Specific entity")] = None,
-    files: Annotated[str | None, typer.Option("--files", help="File paths")] = None,
+    entity: Annotated[Optional[str], typer.Option("--entity", help="Specific entity")] = None,
+    files: Annotated[Optional[str], typer.Option("--files", help="File paths")] = None,
     format: Annotated[str, typer.Option("--format", help="json or markdown")] = "markdown",
 ) -> None:
     """Get context for a task."""
@@ -63,7 +66,7 @@ def correct(
     entity: Annotated[str, typer.Argument(help="Entity name")],
     correction: Annotated[str, typer.Argument(help="Correction text")],
     path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
-    context: Annotated[str | None, typer.Option("--context", help="When this applies")] = None,
+    context: Annotated[Optional[str], typer.Option("--context", help="When this applies")] = None,
     scope: Annotated[str, typer.Option("--scope", help="global, entity, pattern")] = "entity",
 ) -> None:
     """Add a correction."""
@@ -99,7 +102,7 @@ def list_cmd(
     what: Annotated[str, typer.Argument(help="What to list: decisions, conventions, corrections")] = "decisions",
     path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
     limit: Annotated[int, typer.Option("--limit", help="Max items to show")] = 20,
-    entity: Annotated[str | None, typer.Option("--entity", help="Filter by entity")] = None,
+    entity: Annotated[Optional[str], typer.Option("--entity", help="Filter by entity")] = None,
 ) -> None:
     """List indexed content."""
     from lattice_context.cli.list_cmd import list_decisions, list_conventions, list_corrections
@@ -130,7 +133,7 @@ def search(
 @app.command()
 def export(
     path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
-    output: Annotated[Path | None, typer.Option("--output", help="Output file path")] = None,
+    output: Annotated[Optional[Path], typer.Option("--output", help="Output file path")] = None,
     format: Annotated[str, typer.Option("--format", help="Export format")] = "json",
 ) -> None:
     """Export all indexed data to JSON."""
@@ -169,6 +172,72 @@ def api(
     """Start universal context API for all AI tools (Cursor, Windsurf, VS Code, etc)."""
     from lattice_context.cli.api_cmd import start_api_server
     start_api_server(path, port, host)
+
+
+# Team collaboration commands
+team_app = typer.Typer(help="Team collaboration features (comments, votes, verification)")
+
+
+@team_app.command("comment")
+def team_comment(
+    decision_id: Annotated[str, typer.Argument(help="Decision ID")],
+    message: Annotated[str, typer.Argument(help="Your comment")],
+    path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
+    author: Annotated[Optional[str], typer.Option("--author", help="Your name")] = None,
+    email: Annotated[Optional[str], typer.Option("--email", help="Your email")] = None,
+    reply_to: Annotated[Optional[str], typer.Option("--reply-to", help="Reply to comment")] = None,
+) -> None:
+    """Add a comment to a decision."""
+    from lattice_context.cli.team_cmd import comment_on_decision
+    comment_on_decision(decision_id, message, path, author, email, reply_to)
+
+
+@team_app.command("vote")
+def team_vote(
+    decision_id: Annotated[str, typer.Argument(help="Decision ID")],
+    vote_type: Annotated[str, typer.Argument(help="up, down, or remove")],
+    path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
+    email: Annotated[Optional[str], typer.Option("--email", help="Your email")] = None,
+) -> None:
+    """Vote on a decision."""
+    from lattice_context.cli.team_cmd import vote_on_decision
+    vote_on_decision(decision_id, vote_type, path, email)
+
+
+@team_app.command("verify")
+def team_verify(
+    decision_id: Annotated[str, typer.Argument(help="Decision ID")],
+    path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
+    email: Annotated[Optional[str], typer.Option("--email", help="Your email")] = None,
+) -> None:
+    """Mark a decision as verified."""
+    from lattice_context.cli.team_cmd import verify_decision
+    verify_decision(decision_id, path, email)
+
+
+@team_app.command("outdated")
+def team_outdated(
+    decision_id: Annotated[str, typer.Argument(help="Decision ID")],
+    path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
+) -> None:
+    """Mark a decision as outdated."""
+    from lattice_context.cli.team_cmd import mark_outdated
+    mark_outdated(decision_id, path)
+
+
+@team_app.command("activity")
+def team_activity(
+    path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
+    limit: Annotated[int, typer.Option("--limit", help="Number of activities")] = 20,
+    activity_type: Annotated[str, typer.Option("--type", help="Filter by type")] = "all",
+) -> None:
+    """Show recent team activity."""
+    from lattice_context.cli.team_cmd import show_activity
+    show_activity(path, limit, activity_type)
+
+
+# Add team commands to main app
+app.add_typer(team_app, name="team")
 
 
 def main() -> None:
