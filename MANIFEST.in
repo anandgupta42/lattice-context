@@ -1,0 +1,23 @@
+# Include only essential user-facing files
+include README.md
+include LICENSE
+include QUICKSTART.md
+include CHANGELOG.md
+
+# Exclude everything else at root level (development docs)
+global-exclude *_*.md
+exclude ralph-loop.md
+exclude requirement-prd.md
+exclude verify_install.sh
+exclude .dockerignore
+exclude Dockerfile
+exclude docker-compose.yml
+exclude test_monetization.py
+
+# Exclude test and development directories
+prune tests
+prune .github
+prune venv
+prune .claude
+prune integrations
+prune vscode-extension

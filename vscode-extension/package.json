@@ -1,0 +1,74 @@
+{
+  "name": "lattice-context-copilot",
+  "displayName": "Lattice Context for GitHub Copilot",
+  "description": "Provides institutional knowledge to GitHub Copilot via Lattice Context Layer",
+  "version": "1.0.0",
+  "publisher": "lattice",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "copilot",
+    "ai",
+    "context",
+    "dbt",
+    "data"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "lattice.startContextServer",
+        "title": "Lattice: Start Context Server for Copilot"
+      },
+      {
+        "command": "lattice.stopContextServer",
+        "title": "Lattice: Stop Context Server"
+      },
+      {
+        "command": "lattice.queryContext",
+        "title": "Lattice: Get Context for Current File"
+      }
+    ],
+    "configuration": {
+      "title": "Lattice Context",
+      "properties": {
+        "lattice.serverPort": {
+          "type": "number",
+          "default": 8081,
+          "description": "Port for Lattice context server"
+        },
+        "lattice.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically start context server on VS Code startup"
+        },
+        "lattice.maxContextResults": {
+          "type": "number",
+          "default": 5,
+          "description": "Maximum number of context results to provide to Copilot"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

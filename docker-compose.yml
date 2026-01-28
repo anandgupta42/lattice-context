@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  lattice:
+    build: .
+    image: lattice-context:latest
+    volumes:
+      # Mount your dbt project directory
+      - ./:/workspace
+    working_dir: /workspace
+    # Override default command
+    command: lattice serve
+    stdin_open: true
+    tty: true
+    environment:
+      - LATTICE_LOG_LEVEL=INFO
+    # Network mode for MCP server
+    network_mode: host

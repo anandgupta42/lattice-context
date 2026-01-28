@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lattice Context Layer - Give AI Assistants Institutional Knowledge</title>
+    <meta name="description" content="Lattice automatically extracts decisions from your dbt project and serves them to AI assistants. Zero config, fast indexing, smart context retrieval.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        header p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            color: #2d3748;
+        }
+
+        .problem-solution {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .box h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .box.problem {
+            border-left: 4px solid #f56565;
+        }
+
+        .box.solution {
+            border-left: 4px solid #48bb78;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .feature {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 30px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            margin: 30px 0;
+        }
+
+        .code-block code {
+            color: #a0aec0;
+        }
+
+        .code-block .comment {
+            color: #68d391;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .stat {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #718096;
+        }
+
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        footer a {
+            color: #90cdf4;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+
+            header p {
+                font-size: 1.2rem;
+            }
+
+            .problem-solution {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Lattice Context Layer</h1>
+            <p>Give AI assistants the institutional knowledge they need to understand your dbt project</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/altimate-ai/lattice-context" class="btn btn-primary">View on GitHub</a>
+                <a href="#quickstart" class="btn btn-secondary">Get Started</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="section">
+        <div class="container">
+            <div class="problem-solution">
+                <div class="box problem">
+                    <h3>❌ The Problem</h3>
+                    <p>AI assistants like Claude can see <strong>what</strong> exists in your codebase, but not <strong>why</strong> it was built that way.</p>
+                    <br>
+                    <p>Every time you ask for help, you have to explain:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Your naming conventions</li>
+                        <li>Why you join on customer_key not customer_id</li>
+                        <li>What "revenue" actually means in your context</li>
+                        <li>Historical decisions that shaped your models</li>
+                    </ul>
+                </div>
+
+                <div class="box solution">
+                    <h3>✅ The Solution</h3>
+                    <p>Lattice automatically extracts decisions from your git history, detects conventions from patterns, and learns from your corrections.</p>
+                    <br>
+                    <p>Now AI assistants understand:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Your team's naming patterns</li>
+                        <li>Historical context from commits</li>
+                        <li>Business logic and data definitions</li>
+                        <li>Corrections and clarifications you've added</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="background: white;">
+        <div class="container">
+            <h2 class="section-title">Key Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Zero Configuration</h3>
+                    <p>Auto-detects dbt projects. No setup required. Just run lattice init and you're ready.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Fast Indexing</h3>
+                    <p>Indexes 100-model projects in under 30 seconds. Pattern-based extraction is instant.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Smart Context</h3>
+                    <p>Understands partial names, detects patterns, and ranks results by relevance.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">📚</div>
+                    <h3>Git Integration</h3>
+                    <p>Extracts decisions from commit messages and PR descriptions automatically.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Learning System</h3>
+                    <p>User corrections are prioritized and always shown to AI assistants.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🐳</div>
+                    <h3>Multiple Options</h3>
+                    <p>Install via pip, Docker, or Docker Compose. Choose what works for you.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="quickstart">
+        <div class="container">
+            <h2 class="section-title">60-Second Quickstart</h2>
+
+            <div class="code-block">
+<span class="comment"># 1. Install</span>
+pip install lattice-context
+
+<span class="comment"># 2. Initialize in your dbt project</span>
+cd your-dbt-project
+lattice init
+
+<span class="comment"># 3. Index your project</span>
+lattice index
+
+<span class="comment"># 4. Start the MCP server</span>
+lattice serve
+            </div>
+
+            <p style="text-align: center; font-size: 1.2rem; margin: 40px 0;">
+                Then add to Claude Desktop config:
+            </p>
+
+            <div class="code-block">
+{
+  "mcpServers": {
+    "lattice": {
+      "command": "lattice",
+      "args": ["serve"]
+    }
+  }
+}
+            </div>
+
+            <p style="text-align: center; font-size: 1.2rem; margin-top: 40px;">
+                Restart Claude Desktop. Now it knows your project's context! 🎉
+            </p>
+        </div>
+    </section>
+
+    <section class="section" style="background: white;">
+        <div class="container">
+            <h2 class="section-title">Performance</h2>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">&lt;30s</div>
+                    <div class="stat-label">Index 100 models</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">75ms</div>
+                    <div class="stat-label">Average query time</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Configuration required</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container" style="text-align: center;">
+            <h2 class="section-title">Ready to Give Your AI Assistant Context?</h2>
+            <div class="cta-buttons">
+                <a href="https://github.com/altimate-ai/lattice-context" class="btn btn-primary">View on GitHub</a>
+                <a href="https://pypi.org/project/lattice-context/" class="btn btn-secondary">Install from PyPI</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Built with ❤️ by <a href="https://altimate.ai">Altimate AI</a></p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/altimate-ai/lattice-context">GitHub</a> ·
+                <a href="https://github.com/altimate-ai/lattice-context/blob/main/README.md">Documentation</a> ·
+                <a href="https://github.com/altimate-ai/lattice-context/issues">Support</a>
+            </p>
+            <p style="margin-top: 20px; opacity: 0.7; font-size: 0.9rem;">MIT License · Open Source</p>
+        </div>
+    </footer>
+</body>
+</html>
