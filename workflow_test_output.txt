@@ -1,0 +1,44 @@
+======================================================================
+END-TO-END USER WORKFLOW TEST
+======================================================================
+
+📁 Created test project: /var/folders/gf/7xvmxq_94q5__51sc5trr6bw0000gn/T/tmp_vg0u78m/test_project
+
+✅ Created sample dbt project with git history
+
+======================================================================
+STEP 1: Initialize Lattice
+======================================================================
+✅ Lattice initialized
+
+======================================================================
+STEP 2: Index the project
+======================================================================
+✅ Project indexed
+Error: Lattice not initialized in 
+/var/folders/gf/7xvmxq_94q5__51sc5trr6bw0000gn/T/tmp_vg0u78m/test_project
+
+Hint: Run 'lattice init' first to set up Lattice.
+
+Hint: Run 'lattice init' first to set up Lattice.
+
+
+======================================================================
+STEP 3: List decisions (no team activity yet)
+======================================================================
+❌ Failed to list: Usage: lattice list [OPTIONS]
+Try 'lattice list --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument (decisions)                                    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+======================================================================
+STEP 4: Get decision ID for testing
+======================================================================
+Traceback (most recent call last):
+  File "/Users/anandgupta/codebase/altimate-context/test_user_workflow.py", line 264, in <module>
+    success = main()
+  File "/Users/anandgupta/codebase/altimate-context/test_user_workflow.py", line 122, in main
+    conn = sqlite3.connect(str(db_path))
+sqlite3.OperationalError: unable to open database file

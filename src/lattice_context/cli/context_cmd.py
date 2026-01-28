@@ -1,5 +1,9 @@
 """CLI command for getting context."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 import asyncio
 import json
 from pathlib import Path
@@ -17,8 +21,8 @@ console = Console()
 def get_context(
     query: str,
     path: Path,
-    entity: str | None = None,
-    files: str | None = None,
+    entity: Optional[str] = None,
+    files: Optional[str] = None,
     format: str = "markdown"
 ) -> None:
     """Get context for a task."""

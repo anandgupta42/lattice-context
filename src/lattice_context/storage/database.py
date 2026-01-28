@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -29,7 +31,7 @@ class Database:
 
     def __init__(self, db_path: Path):
         self.db_path = db_path
-        self.conn: sqlite3.Connection | None = None
+        self.conn: Optional[sqlite3.Connection] = None
 
     def connect(self) -> sqlite3.Connection:
         """Get database connection."""
@@ -186,7 +188,7 @@ class Database:
         row = cursor.fetchone()
         return row is not None
 
-    def last_indexed_at(self) -> datetime | None:
+    def last_indexed_at(self) -> Optional[datetime]:
         """Get last indexed timestamp."""
         conn = self.connect()
         cursor = conn.execute("SELECT value FROM metadata WHERE key = 'last_indexed_at'")
@@ -401,7 +403,7 @@ class Database:
         )
         conn.commit()
 
-    def get_conventions(self, tool: DataTool | None = None) -> list[Convention]:
+    def get_conventions(self, tool: Optional[DataTool] = None) -> list[Convention]:
         """Get conventions."""
         conn = self.connect()
 
@@ -453,7 +455,7 @@ class Database:
         )
         conn.commit()
 
-    def get_corrections(self, entity: str | None = None) -> list[Correction]:
+    def get_corrections(self, entity: Optional[str] = None) -> list[Correction]:
         """Get corrections."""
         conn = self.connect()
 
@@ -494,7 +496,7 @@ class Database:
         author: str,
         author_email: str,
         content: str,
-        parent_id: str | None = None
+        parent_id: Optional[str] = None
     ) -> str:
         """Add a comment to a decision."""
         import uuid
@@ -631,7 +633,7 @@ class Database:
         )
         conn.commit()
 
-    def get_decision_metadata(self, decision_id: str) -> dict | None:
+    def get_decision_metadata(self, decision_id: str) -> Optional[dict]:
         """Get metadata for a decision."""
         conn = self.connect()
         cursor = conn.execute(

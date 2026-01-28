@@ -1,7 +1,9 @@
 """Configuration management for Lattice."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import yaml
 from pydantic import BaseModel, Field
@@ -69,7 +71,7 @@ class LatticeConfig(BaseModel):
     extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
     retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
     conventions: ConventionConfig = Field(default_factory=ConventionConfig)
-    license_key: str | None = None  # Optional license key for paid tiers
+    license_key: Optional[str] = None  # Optional license key for paid tiers
 
     @classmethod
     def load(cls, path: Path) -> "LatticeConfig":

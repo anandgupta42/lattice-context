@@ -1,5 +1,9 @@
 """FastAPI backend for Lattice web interface."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 from datetime import datetime
 from pathlib import Path
 
@@ -23,7 +27,7 @@ class StatsResponse(BaseModel):
     total_decisions: int
     total_conventions: int
     total_corrections: int
-    last_indexed_at: datetime | None
+    last_indexed_at: Optional[datetime]
 
 
 class DecisionResponse(BaseModel):
@@ -81,7 +85,7 @@ def create_app(db_path: Path) -> FastAPI:
         )
 
     @app.get("/api/decisions", response_model=list[DecisionResponse])
-    async def list_decisions(limit: int = 100, entity: str | None = None):
+    async def list_decisions(limit: int = 100, entity: Optional[str] = None):
         """List all decisions."""
         decisions = db.list_decisions(limit=limit)
 
@@ -262,7 +266,7 @@ def create_app(db_path: Path) -> FastAPI:
         }
 
     @app.get("/api/graph")
-    async def get_graph(entity_type: str | None = None, limit: int = 100):
+    async def get_graph(entity_type: Optional[str] = None, limit: int = 100):
         """Get graph data for visualization.
 
         Returns nodes (decisions) and links (relationships) for D3.js force graph.

@@ -1,5 +1,9 @@
 """CLI command for indexing projects."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 import time
 from datetime import datetime
 from pathlib import Path
@@ -19,7 +23,7 @@ console = Console()
 logger = get_logger(__name__)
 
 
-def index_project(path: Path, incremental: bool = False, tool: str | None = None, verbose: bool = False) -> None:
+def index_project(path: Path, incremental: bool = False, tool: Optional[str] = None, verbose: bool = False) -> None:
     """Index a project to extract decisions and conventions."""
     # Configure logging
     configure_logging(verbose)

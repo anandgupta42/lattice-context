@@ -1,5 +1,9 @@
 """Extract decisions from git history."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 import hashlib
 import re
 from datetime import datetime
@@ -130,7 +134,7 @@ class GitExtractor:
 
         return decisions
 
-    def _guess_entity_from_diff(self, commit: Commit) -> str | None:
+    def _guess_entity_from_diff(self, commit: Commit) -> Optional[str]:
         """Guess entity name from changed files."""
         try:
             if not commit.parents:

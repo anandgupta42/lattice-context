@@ -1,5 +1,9 @@
 """Export command to export indexed content."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 import json
 from pathlib import Path
 
@@ -13,7 +17,7 @@ console = Console()
 
 def export_data(
     path: Path = Path("."),
-    output: Path | None = None,
+    output: Optional[Path] = None,
     format: str = "json",
 ) -> None:
     """Export all indexed data to JSON."""

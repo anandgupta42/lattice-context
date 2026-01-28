@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 import subprocess
 import sys
 from datetime import datetime
@@ -45,9 +47,9 @@ def comment_on_decision(
     decision_id: Annotated[str, typer.Argument(help="Decision ID to comment on")],
     message: Annotated[str, typer.Argument(help="Your comment")],
     path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
-    author: Annotated[str | None, typer.Option("--author", help="Your name")] = None,
-    email: Annotated[str | None, typer.Option("--email", help="Your email")] = None,
-    reply_to: Annotated[str | None, typer.Option("--reply-to", help="Comment ID to reply to")] = None,
+    author: Annotated[Optional[str], typer.Option("--author", help="Your name")] = None,
+    email: Annotated[Optional[str], typer.Option("--email", help="Your email")] = None,
+    reply_to: Annotated[Optional[str], typer.Option("--reply-to", help="Comment ID to reply to")] = None,
 ) -> None:
     """Add a comment to a decision.
 
@@ -108,7 +110,7 @@ def vote_on_decision(
     decision_id: Annotated[str, typer.Argument(help="Decision ID to vote on")],
     vote_type: Annotated[str, typer.Argument(help="up, down, or remove")],
     path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
-    email: Annotated[str | None, typer.Option("--email", help="Your email")] = None,
+    email: Annotated[Optional[str], typer.Option("--email", help="Your email")] = None,
 ) -> None:
     """Vote on a decision (upvote, downvote, or remove vote).
 
@@ -170,7 +172,7 @@ def vote_on_decision(
 def verify_decision(
     decision_id: Annotated[str, typer.Argument(help="Decision ID to verify")],
     path: Annotated[Path, typer.Option("--path", help="Project path")] = Path("."),
-    email: Annotated[str | None, typer.Option("--email", help="Your email")] = None,
+    email: Annotated[Optional[str], typer.Option("--email", help="Your email")] = None,
 ) -> None:
     """Mark a decision as verified (still accurate).
 

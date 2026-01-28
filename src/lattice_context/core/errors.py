@@ -1,12 +1,16 @@
 """Error types with user-friendly messages."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 from pathlib import Path
 
 
 class LatticeError(Exception):
     """Base error with user-friendly message."""
 
-    def __init__(self, message: str, hint: str | None = None):
+    def __init__(self, message: str, hint: Optional[str] = None):
         self.message = message
         self.hint = hint
         super().__init__(message)

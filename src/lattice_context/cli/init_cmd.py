@@ -1,5 +1,9 @@
 """CLI command for initializing Lattice."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 from pathlib import Path
 
 from rich.console import Console
@@ -12,7 +16,7 @@ from lattice_context.storage.database import Database
 console = Console()
 
 
-def detect_project_type(path: Path) -> str | None:
+def detect_project_type(path: Path) -> Optional[str]:
     """Auto-detect project type. User should never need to configure this."""
     # dbt detection (most common)
     if (path / "dbt_project.yml").exists():
@@ -29,7 +33,7 @@ def detect_project_type(path: Path) -> str | None:
     return None
 
 
-def find_manifest(path: Path) -> Path | None:
+def find_manifest(path: Path) -> Optional[Path]:
     """Find dbt manifest without user config."""
     candidates = [
         path / "target" / "manifest.json",

@@ -1,5 +1,9 @@
 """CLI command for adding corrections."""
 
+from __future__ import annotations
+
+from typing import Optional
+
 import hashlib
 from datetime import datetime
 from pathlib import Path
@@ -17,7 +21,7 @@ def add_correction(
     entity: str,
     correction: str,
     path: Path,
-    context: str | None = None,
+    context: Optional[str] = None,
     scope: str = "entity"
 ) -> None:
     """Add a correction."""
