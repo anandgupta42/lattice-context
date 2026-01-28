@@ -1,5 +1,7 @@
 """SQLite database management for Lattice."""
 
+from __future__ import annotations
+
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -127,6 +129,53 @@ class Database:
                 updated_at TIMESTAMP NOT NULL
             )
         """)
+
+        # Team Workspace tables (v0.2.0)
+        # Comments on decisions
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS decision_comments (
+                id TEXT PRIMARY KEY,
+                decision_id TEXT NOT NULL,
+                author TEXT NOT NULL,
+                author_email TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP,
+                parent_id TEXT,
+                FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE,
+                FOREIGN KEY (parent_id) REFERENCES decision_comments(id) ON DELETE CASCADE
+            )
+        """)
+
+        # Votes on decisions
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS decision_votes (
+                decision_id TEXT NOT NULL,
+                user_email TEXT NOT NULL,
+                vote INTEGER NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                PRIMARY KEY (decision_id, user_email),
+                FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
+            )
+        """)
+
+        # Decision metadata (status, verification)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS decision_metadata (
+                decision_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL DEFAULT 'active',
+                last_verified_at TIMESTAMP,
+                last_verified_by TEXT,
+                vote_score INTEGER DEFAULT 0,
+                FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
+            )
+        """)
+
+        # Create indexes for team features
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_comments_decision ON decision_comments(decision_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_comments_author ON decision_comments(author_email)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_votes_decision ON decision_votes(decision_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_metadata_status ON decision_metadata(status)")
 
         conn.commit()
 
@@ -436,6 +485,169 @@ class Database:
                 )
             )
         return corrections
+
+    # Team Workspace methods (v0.2.0)
+
+    def add_comment(
+        self,
+        decision_id: str,
+        author: str,
+        author_email: str,
+        content: str,
+        parent_id: str | None = None
+    ) -> str:
+        """Add a comment to a decision."""
+        import uuid
+
+        comment_id = f"cmt_{uuid.uuid4().hex[:12]}"
+        conn = self.connect()
+
+        conn.execute(
+            """
+            INSERT INTO decision_comments
+            (id, decision_id, author, author_email, content, created_at, parent_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (comment_id, decision_id, author, author_email, content, datetime.now(), parent_id)
+        )
+        conn.commit()
+        return comment_id
+
+    def get_comments(self, decision_id: str) -> list[dict]:
+        """Get all comments for a decision."""
+        conn = self.connect()
+        cursor = conn.execute(
+            """
+            SELECT * FROM decision_comments
+            WHERE decision_id = ?
+            ORDER BY created_at ASC
+            """,
+            (decision_id,)
+        )
+
+        comments = []
+        for row in cursor.fetchall():
+            comments.append({
+                "id": row["id"],
+                "decision_id": row["decision_id"],
+                "author": row["author"],
+                "author_email": row["author_email"],
+                "content": row["content"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+                "parent_id": row["parent_id"]
+            })
+        return comments
+
+    def vote_decision(self, decision_id: str, user_email: str, vote: int) -> None:
+        """Vote on a decision. Vote: 1 for upvote, -1 for downvote, 0 to remove."""
+        conn = self.connect()
+
+        if vote == 0:
+            # Remove vote
+            conn.execute(
+                "DELETE FROM decision_votes WHERE decision_id = ? AND user_email = ?",
+                (decision_id, user_email)
+            )
+        else:
+            # Add or update vote
+            conn.execute(
+                """
+                INSERT INTO decision_votes (decision_id, user_email, vote, created_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(decision_id, user_email)
+                DO UPDATE SET vote = excluded.vote
+                """,
+                (decision_id, user_email, vote, datetime.now())
+            )
+
+        # Update vote score in metadata
+        cursor = conn.execute(
+            "SELECT SUM(vote) as score FROM decision_votes WHERE decision_id = ?",
+            (decision_id,)
+        )
+        score = cursor.fetchone()["score"] or 0
+
+        conn.execute(
+            """
+            INSERT INTO decision_metadata (decision_id, vote_score)
+            VALUES (?, ?)
+            ON CONFLICT(decision_id)
+            DO UPDATE SET vote_score = excluded.vote_score
+            """,
+            (decision_id, score)
+        )
+
+        conn.commit()
+
+    def get_vote_score(self, decision_id: str) -> int:
+        """Get vote score for a decision."""
+        conn = self.connect()
+        cursor = conn.execute(
+            "SELECT vote_score FROM decision_metadata WHERE decision_id = ?",
+            (decision_id,)
+        )
+        row = cursor.fetchone()
+        return row["vote_score"] if row else 0
+
+    def get_user_vote(self, decision_id: str, user_email: str) -> int:
+        """Get user's vote on a decision. Returns 1, -1, or 0."""
+        conn = self.connect()
+        cursor = conn.execute(
+            "SELECT vote FROM decision_votes WHERE decision_id = ? AND user_email = ?",
+            (decision_id, user_email)
+        )
+        row = cursor.fetchone()
+        return row["vote"] if row else 0
+
+    def verify_decision(self, decision_id: str, user_email: str) -> None:
+        """Mark a decision as verified by a user."""
+        conn = self.connect()
+        conn.execute(
+            """
+            INSERT INTO decision_metadata (decision_id, status, last_verified_at, last_verified_by)
+            VALUES (?, 'verified', ?, ?)
+            ON CONFLICT(decision_id)
+            DO UPDATE SET
+                status = 'verified',
+                last_verified_at = excluded.last_verified_at,
+                last_verified_by = excluded.last_verified_by
+            """,
+            (decision_id, datetime.now(), user_email)
+        )
+        conn.commit()
+
+    def mark_outdated(self, decision_id: str) -> None:
+        """Mark a decision as outdated."""
+        conn = self.connect()
+        conn.execute(
+            """
+            INSERT INTO decision_metadata (decision_id, status)
+            VALUES (?, 'outdated')
+            ON CONFLICT(decision_id)
+            DO UPDATE SET status = 'outdated'
+            """,
+            (decision_id,)
+        )
+        conn.commit()
+
+    def get_decision_metadata(self, decision_id: str) -> dict | None:
+        """Get metadata for a decision."""
+        conn = self.connect()
+        cursor = conn.execute(
+            "SELECT * FROM decision_metadata WHERE decision_id = ?",
+            (decision_id,)
+        )
+        row = cursor.fetchone()
+        if row:
+            return {
+                "decision_id": row["decision_id"],
+                "status": row["status"],
+                "last_verified_at": row["last_verified_at"],
+                "last_verified_by": row["last_verified_by"],
+                "vote_score": row["vote_score"]
+            }
+        return None
 
     def close(self) -> None:
         """Close database connection."""

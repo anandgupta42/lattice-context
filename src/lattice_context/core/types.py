@@ -1,7 +1,10 @@
 """Core type definitions for Lattice Context Layer."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -114,7 +117,7 @@ class Correction(BaseModel):
     """User-provided knowledge that overrides or supplements extracted context."""
     id: str
     entity: str
-    entity_type: EntityType | None = None
+    entity_type: Optional[EntityType] = None
     correction: str
     context: str = ""
     added_by: str
@@ -132,11 +135,11 @@ class TierContent(BaseModel):
 
 class ContextRequest(BaseModel):
     """Request for context."""
-    task: str | None = None
-    files: list[str] | None = None
-    entities: list[str] | None = None
+    task: Optional[str] = None
+    files: Optional[list[str]] = None
+    entities: Optional[list[str]] = None
     max_tokens: int = 8000
-    tools: list[DataTool] | None = None
+    tools: Optional[list[DataTool]] = None
     include_decisions: bool = True
     include_conventions: bool = True
     include_corrections: bool = True
@@ -158,3 +161,42 @@ class IndexResult(BaseModel):
     conventions: int
     decisions: int
     elapsed_seconds: float
+
+
+# Team Workspace Types (v0.2.0)
+
+
+class DecisionStatus(str, Enum):
+    """Status of a decision."""
+    ACTIVE = "active"
+    VERIFIED = "verified"
+    OUTDATED = "outdated"
+
+
+class Comment(BaseModel):
+    """A comment on a decision."""
+    id: str
+    decision_id: str
+    author: str
+    author_email: str
+    content: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    parent_id: Optional[str] = None
+
+
+class Vote(BaseModel):
+    """A vote on a decision."""
+    decision_id: str
+    user_email: str
+    vote: int  # 1 for upvote, -1 for downvote
+    created_at: datetime
+
+
+class DecisionMetadata(BaseModel):
+    """Metadata for a decision."""
+    decision_id: str
+    status: DecisionStatus = DecisionStatus.ACTIVE
+    last_verified_at: Optional[datetime] = None
+    last_verified_by: Optional[str] = None
+    vote_score: int = 0
