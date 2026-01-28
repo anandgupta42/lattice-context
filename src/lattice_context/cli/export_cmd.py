@@ -59,7 +59,6 @@ def export_data(
                     "id": c.id,
                     "type": c.type.value,
                     "pattern": c.pattern,
-                    "description": c.description,
                     "applies_to": [e.value for e in c.applies_to],
                     "examples": c.examples,
                     "frequency": c.frequency,
